@@ -27,9 +27,9 @@ se <- function(x) sd(x, na.rm = T)/sqrt(length(x))
 # LOAD DATA ---------------------------------------------------------------
 
 #load full bibliographic dataframe of all studies used in the lit review (though not necessarily quantitatively)
-fullbiblio<-read.csv('biblio_all_final.csv')
+fullbiblio<-read.csv('analysis/input_data/biblio_all_final.csv')
 #load antimicrobial susceptibility testing dataset
-MAR.allstudies<-read.csv('AMSdataset_051018.csv', stringsAsFactors = F)
+MAR.allstudies<-read.csv('analysis/input_data/AMSdataset_051018.csv', stringsAsFactors = F)
 
 #i've classified each of the antibiotics into 5 levels of antibiotic classification, as best as I can.
 #these lines strip out each of these classifications into separate vectors to keep them safe so we can work with them later is we want, before we revert to the highest level for the actual analysis
@@ -40,7 +40,7 @@ ABclass4<-as.factor(as.character(MAR.allstudies[4,20:ncol(MAR.allstudies)]))
 
 #re-load dataframe with just highest level antibiotic classification as the heading of the antibiotic columns 
 #this line removes the unwanted antibiotic classification rows and the first column describing what each row is.
-MAR.allstudies<-read.csv('AMSdataset_051018.csv', stringsAsFactors = F)[-c(1:4),-1]
+MAR.allstudies<-read.csv('analysis/input_data/AMSdataset_051018.csv', stringsAsFactors = F)[-c(1:4),-1]
 
 #this line removes sample.name column and the wind direction column, which just describes the meaning of the distance.m column
 MAR.allstudies<-MAR.allstudies[,-c(1,8)]

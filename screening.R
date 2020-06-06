@@ -1,7 +1,6 @@
 # START -------------------------------------------------------------------
 rm(list=ls())
 set.seed(1234)
-setwd("~/Dropbox/EnvAge/Final files 08:10:18")
 
 #install dependency for metagear - EBImage
 #source("https://bioconductor.org/biocLite.R") 
@@ -23,14 +22,14 @@ library(randomForest)
 # LOAD BIBLIOS AND CLEAN --------------------------------------------------
 
 #import SCOPUS bib file and convert to df
-scopus_biblio_1<-as.data.frame(read_bibliography('scopus_1to676_130818.bib')) #import biblio
+scopus_biblio_1<-as.data.frame(read_bibliography('screening/input_data/scopus_1to676_130818.bib')) #import biblio
 final_scopus_biblio.080818<-scopus_biblio_1 #compile final biblio (in this case just one file)
 final_scopus_biblio.080818$abstract[which(is.na(final_scopus_biblio.080818$abstract))]<-"" #turn NA abstracts to empty space
 final_scopus_biblio.080818$source<-'scopus' #label with source for downstream tracking
 
 #import WoS bib file and convert to df
-wos_biblio_1<-as.data.frame(read_bibliography('wos_1to500_130818.bib'))
-wos_biblio_2<-as.data.frame(read_bibliography('wos_501-832_130818.bib'))
+wos_biblio_1<-as.data.frame(read_bibliography('screening/input_data/wos_1to500_130818.bib'))
+wos_biblio_2<-as.data.frame(read_bibliography('screening/input_data/wos_501-832_130818.bib'))
 colnames.dup<-count(c(colnames(wos_biblio_1),colnames(wos_biblio_2)))
 matchingcols<-as.character(colnames.dup$x[colnames.dup$freq==2])
 final_wos_biblio.080818<-rbind(wos_biblio_1[,matchingcols],wos_biblio_2[,matchingcols])
@@ -38,9 +37,9 @@ final_wos_biblio.080818$abstract[which(is.na(final_wos_biblio.080818$abstract))]
 final_wos_biblio.080818$source<-'wos'
 
 #import pubmed nbib files and convert to df
-pubmed_biblio_1<-as.data.frame(read_bibliography('pubmed_1to200_130818.nbib'))
-pubmed_biblio_2<-as.data.frame(read_bibliography('pubmed_201to400_130818.nbib'))
-pubmed_biblio_3<-as.data.frame(read_bibliography('pubmed_400to541_130818.nbib'))
+pubmed_biblio_1<-as.data.frame(read_bibliography('screening/input_data/pubmed_1to200_130818.nbib'))
+pubmed_biblio_2<-as.data.frame(read_bibliography('screening/input_data/pubmed_201to400_130818.nbib'))
+pubmed_biblio_3<-as.data.frame(read_bibliography('screening/input_data/pubmed_400to541_130818.nbib'))
 colnames.dup<-count(c(colnames(pubmed_biblio_1),colnames(pubmed_biblio_2),colnames(pubmed_biblio_3)))
 matchingcols<-as.character(colnames.dup$x[colnames.dup$freq==3])
 final_pubmed_biblio.080818<-rbind(pubmed_biblio_1[,matchingcols],pubmed_biblio_2[,matchingcols],pubmed_biblio_3[,matchingcols])
@@ -63,7 +62,7 @@ count(is.na(masterbiblio.080818$abstract))
 
 #remove duplicates
 dupsfinal.080818<-find_duplicates(masterbiblio.080818)
-masterbiblio.080818_dupsremoved<-extract_unique_references(dupsfinal.080818)
+masterbiblio.080818_dupsremoved<-extract_unique_references(masterbiblio.080818,dupsfinal.080818)
 #remove duplicates double check by removing duplicated dois
 doi.dups<-which(duplicated(masterbiblio.080818_dupsremoved$doi, incomparables = NA))
 masterbiblio.080818_dupsremoved<-masterbiblio.080818_dupsremoved[-doi.dups,]
@@ -79,9 +78,9 @@ masterbiblio.080818_dupsremoved<-masterbiblio.080818_dupsremoved[-doi.dups,]
 #NO RELEVANCE (NO): Not DIRECTLY about environmental AMR AND/OR AIR
 
 #check what effort files you have before removing
-list.files(pattern = "effort")
+list.files("output_data", pattern = "effort")
 #do.call(file.remove, list(list.files(pattern="effort")))
-list.files(pattern = "effort")
+list.files("output_data", pattern = "effort")
 set.seed(1235)
 topic.temp<-masterbiblio.080818_dupsremoved[sample(1:nrow(masterbiblio.080818_dupsremoved)),]
 set.seed(1235)
@@ -97,14 +96,14 @@ metagear_topic.temp<-topic.temp[,c("author","year","title","journal","volume","L
 colnames(metagear_topic.temp)<-colnames(example_references_metagear)
 
 #screen abstracts of and classify manually - remember to save as you go along in metagear console
-effort_distribute(metagear_topic.temp, initialize = TRUE, reviewers = "envamr", save_split = TRUE)
-abstract_screener('effort_envamr.csv', aReviewer = 'envamr')
-effort_distribute(metagear_topic.temp, initialize = TRUE, reviewers = "test", save_split = TRUE)
-abstract_screener('effort_test.csv', aReviewer = 'test')
+effort_distribute(metagear_topic.temp, initialize = TRUE, reviewers = "envamr", save_split = TRUE, directory="output_data")
+abstract_screener('output_data/effort_envamr.csv', aReviewer = 'envamr')
+effort_distribute(metagear_topic.temp, initialize = TRUE, reviewers = "test", save_split = TRUE, directory="output_data")
+abstract_screener('output_data/effort_test.csv', aReviewer = 'test')
 
 #check file wrote OK and reload it as 'screenset'
-list.files(pattern = "effort")
-screenset<-read.csv('effort_envamr.csv')
+list.files("output_data", pattern = "effort")
+screenset<-read.csv('output_data/effort_envamr.csv')
 
 #create sub-bibliographies of relevant and clinical data
 masterbiblio.080818_dupsremoved$relevant<-screenset$INCLUDE
@@ -196,8 +195,8 @@ metagear_topic.temp<-topic.temp[,c("author","year","title","journal","volume","L
 colnames(metagear_topic.temp)<-colnames(example_references_metagear)
 
 #screen abstracts of a sub-bibliography e.g. pig
-effort_distribute(metagear_topic.temp, initialize = TRUE, reviewers = "pig", save_split = TRUE)
-abstract_screener('effort_pig.csv', aReviewer = 'pig')
+effort_distribute(metagear_topic.temp, initialize = TRUE, reviewers = "pig", save_split = TRUE, directory="output_data")
+abstract_screener('output_data/effort_pig.csv', aReviewer = 'pig')
 
 #write it to a csv
-#write.csv(biblio_wastewater, 'biblio_wastewater.csv')
+#write.csv(biblio_wastewater, 'output_data/biblio_wastewater.csv')
