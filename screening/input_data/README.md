@@ -13,7 +13,7 @@ pubmed_400to541_130818.nbib
 
 
 ## SCOPUS:
-TITLE-ABS ({air}OR{airborne}OR{air-borne}ORbioaerosol*)ANDTITLE-ABS (antimicrobial*ORantibiotic*ORantibacterial*ORantifungal*ORantiviral*ORantihelm*ORantipara*ORantiprot*ORbiocid*OR*drugPRE/2resist*)
+TITLE-ABS ({air} OR {airborne} OR {air-borne} OR bioaerosol*)AND TITLE-ABS (antimicrobial* OR antibiotic* OR antibacterial* OR antifungal* OR antiviral* OR antihelm* OR antipara* OR antiprot*OR biocid* OR *drugPRE/2resist*)
 
 scopus_1to676_130818
 
